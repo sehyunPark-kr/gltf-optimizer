@@ -134,7 +134,7 @@ def copy_models(config: Config, dir: Directory, target_file_paths: List[str]):
 
 def copy_and_convert_gltf(config: Config, source: str, dest: str):
     gltf_path = convert_file_path(source, dest, ".gltf")
-    subprocess.run(config.model_settings[0].gltf_separate.format(source, gltf_path), shell=True)
+    subprocess.run(config.model_settings[0].to_gltf_separate(source, gltf_path), shell=True)
 
 #--------------------------------------------
 def optimize_textures(config : Config, dir : Directory):
@@ -158,6 +158,7 @@ def optimize_textures(config : Config, dir : Directory):
             convert_tasks = [(texture_setting, texture_path, file_path) for file_path in get_all_file_paths(texture_path, [".png"], False)]
             convert_futures = [executor.submit(to_ktx, *task) for task in convert_tasks]
             concurrent.futures.wait(convert_futures)
+
         index += 1
       
 #--------------------------------------------
@@ -169,22 +170,16 @@ def texture_copy(file_path : str, texture_path : str):
 #--------------------------------------------
 def texture_resize(texture_setting : Config.TextureSetting, file_path : str, texture_path : str):
     copy_path = convert_file_path(file_path, texture_path, ".png")
-    subprocess.run(texture_setting.resize.format(copy_path), shell=True)
-    subprocess.run(texture_setting.resize_scale.format(copy_path), shell=True)
+    subprocess.run(texture_setting.resize(copy_path), shell=True)
+    subprocess.run(texture_setting.resize_scale(copy_path), shell=True)
 
 #--------------------------------------------
 def to_ktx(texture_setting : Config.TextureSetting, texture_path : str, file_path : str):
     ktx_path = convert_file_path(file_path, texture_path, ".ktx2")
     if texture_setting.keywords and contains_substring(texture_setting.keywords, file_path): # LightMap
-        if texture_setting.default_format == "uastc":
-            subprocess.run(texture_setting.to_etc1s.format(ktx_path, file_path), shell=True)
-        else:
-            subprocess.run(texture_setting.to_uastc.format(ktx_path, file_path), shell=True)
+        subprocess.run(texture_setting.to_ktx_other(file_path, ktx_path), shell=True)
     else: 
-        if texture_setting.default_format == "uastc":
-            subprocess.run(texture_setting.to_uastc.format(ktx_path, file_path), shell=True)
-        else:
-            subprocess.run(texture_setting.to_etc1s.format(ktx_path, file_path), shell=True)
+        subprocess.run(texture_setting.to_ktx(file_path, ktx_path), shell=True)
 
     os.remove(file_path)
 
@@ -208,7 +203,7 @@ def optimize_model(model_setting : Config.ModelSetting, dir : Directory, file_pa
     command_move_to_dest = "mv {} {}"
 
     copy_to_glb_path = convert_file_path(file_path, dir.workspace, "{}.glb".format(model_setting.suffix))
-    subprocess.run(model_setting.glb.format(file_path, copy_to_glb_path), shell=True)
+    subprocess.run(model_setting.to_glb(file_path, copy_to_glb_path), shell=True)
 
     with open(file_path, 'r') as file:
         gltf_data = json.load(file)
@@ -226,15 +221,15 @@ def optimize_model(model_setting : Config.ModelSetting, dir : Directory, file_pa
         materials = gltf_data.get("materials", [])
 
         if model_setting.tolerance != -1:
-            subprocess.run(model_setting.weld.format(copy_to_glb_path, copy_to_glb_path), shell=True)
+            subprocess.run(model_setting.weld(copy_to_glb_path, copy_to_glb_path), shell=True)
 
         if model_setting.ratio != -1:
-            subprocess.run(model_setting.simplify.format(copy_to_glb_path, copy_to_glb_path), shell=True)
+            subprocess.run(model_setting.simplify(copy_to_glb_path, copy_to_glb_path), shell=True)
 
-        subprocess.run(model_setting.draco.format(copy_to_glb_path, copy_to_glb_path), shell=True)
+        subprocess.run(model_setting.draco(copy_to_glb_path, copy_to_glb_path), shell=True)
 
         copy_to_gltf_path = convert_file_path(file_path, dir.workspace, "{}.gltf".format(model_setting.suffix))
-        subprocess.run(model_setting.gltf_separate.format(copy_to_glb_path, copy_to_gltf_path), shell=True)
+        subprocess.run(model_setting.to_gltf_separate(copy_to_glb_path, copy_to_gltf_path), shell=True)
 
         with open(copy_to_gltf_path, 'r') as file:
             gltf_data = json.load(file)
@@ -254,7 +249,7 @@ def optimize_model(model_setting : Config.ModelSetting, dir : Directory, file_pa
             json.dump(gltf_data, file, indent=4)
     else:
         copy_to_gltf_path = convert_file_path(file_path, dir.workspace, "{}.gltf".format(model_setting.suffix))
-        subprocess.run(model_setting.gltf_separate.format(copy_to_glb_path, copy_to_gltf_path), shell=True)
+        subprocess.run(model_setting.to_gltf_separate(copy_to_glb_path, copy_to_gltf_path), shell=True)
 
 #--------------------------------------------
     # After moving gltf, convert it to glb and put it back
@@ -264,7 +259,7 @@ def optimize_model(model_setting : Config.ModelSetting, dir : Directory, file_pa
 
     # convert glb
     glb_file_path = convert_file_path(copy_to_gltf_path, dir.texture[0], ".glb")
-    subprocess.run(model_setting.glb_separate.format(move_gltf_path, glb_file_path), shell=True)
+    subprocess.run(model_setting.to_glb_separate(move_gltf_path, glb_file_path), shell=True)
 
     # put it back
     workspace_glb_path = convert_file_path(move_gltf_path, dir.workspace, ".glb")
