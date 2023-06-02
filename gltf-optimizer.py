@@ -195,7 +195,7 @@ def optimize_textures(texture_settings, base_model_copy_path, workspace_path):
         default_format = texture_setting.get("defualt_format", "etc1s")
         keywords = texture_setting.get('keywords', "")
         
-        uastc_blk_d = texture_setting.get("uastc_blk_d", "8x8")
+        astc_blk_d = texture_setting.get("astc_blk_d", "8x8")
         uastc_quality = texture_setting.get("uastc_quality", 2)
         uastc_rdo_l = texture_setting.get("uastc_rdo_l", 0.5)
         uastc_rdo_d = texture_setting.get("uastc_rdo_d", 8192)
@@ -219,7 +219,7 @@ def optimize_textures(texture_settings, base_model_copy_path, workspace_path):
             
             # Texture Convert KTX2
            
-            convert_tasks = [(texture_path, file_path, default_format, keywords, uastc_blk_d, uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, clevel, qlevel, assign_oetf) for file_path in get_all_file_paths(texture_path, [".png"], False)]
+            convert_tasks = [(texture_path, file_path, default_format, keywords, astc_blk_d, uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, clevel, qlevel, assign_oetf) for file_path in get_all_file_paths(texture_path, [".png"], False)]
             convert_futures = [executor.submit(to_ktx, *task) for task in convert_tasks]
             concurrent.futures.wait(convert_futures)
       
@@ -240,8 +240,8 @@ def texture_resize(texture_path, file_path, max_size, texture_scale):
     subprocess.run(command_resize_scale.format(texture_scale, copy_path), shell=True)
 
 #--------------------------------------------
-def to_ktx(texture_path, file_path, default_format, keywords, uastc_blk_d, uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, clevel, qlevel, assign_oetf):
-    command_uastc = "toktx --genmipmap --t2 --encode uastc --uastc_blk_d {} --uastc_quality {} --uastc_rdo_l {} --uastc_rdo_d {} --zcmp {} --assign_oetf {} --assign_primaries none '{}' '{}'"
+def to_ktx(texture_path, file_path, default_format, keywords, astc_blk_d, uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, clevel, qlevel, assign_oetf):
+    command_uastc = "toktx --genmipmap --t2 --encode uastc --astc_blk_d {} --uastc_quality {} --uastc_rdo_l {} --uastc_rdo_d {} --zcmp {} --assign_oetf {} --assign_primaries none '{}' '{}'"
     command_etc1 = "toktx --genmipmap --t2 --encode etc1s --clevel {} --qlevel {} --assign_oetf {} --assign_primaries none '{}' '{}'"
     ktx_path = convert_file_path(file_path, texture_path, ".ktx2")
 
@@ -249,10 +249,10 @@ def to_ktx(texture_path, file_path, default_format, keywords, uastc_blk_d, uastc
         if default_format == "uastc":
             subprocess.run(command_etc1.format(clevel, qlevel, assign_oetf, ktx_path, file_path), shell=True)
         else:
-            subprocess.run(command_uastc.format(uastc_blk_d, uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, assign_oetf, ktx_path, file_path), shell=True)
+            subprocess.run(command_uastc.format(astc_blk_d, uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, assign_oetf, ktx_path, file_path), shell=True)
     else: 
         if default_format == "uastc":
-            subprocess.run(command_uastc.format(uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, assign_oetf, ktx_path, file_path), shell=True)
+            subprocess.run(command_uastc.format(astc_blk_d, uastc_quality, uastc_rdo_l, uastc_rdo_d, zcmp, assign_oetf, ktx_path, file_path), shell=True)
         else:
             subprocess.run(command_etc1.format(clevel, qlevel, assign_oetf, ktx_path, file_path), shell=True)
 

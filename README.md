@@ -84,7 +84,7 @@ It is useful to change the model like this and call it.
       "defualt_format" : "etc1s",
       "keywords" : ["final"],
 
-      "uastc_blk_d" : "8x8",
+      "astc_blk_d" : "8x8",
       "uastc_quality" : 2,
       "uastc_rdo_l": 0.5,
       "uastc_rdo_d": 8192,
@@ -142,7 +142,7 @@ It is useful to change the model like this and call it.
       "defualt_format" : "etc1s",
       "keywords" : ["final"],
       
-      "uastc_blk_d" : "8x8",
+      "astc_blk_d" : "8x8",
       "uastc_quality" : 2,
       "uastc_rdo_l": 0.5,
       "uastc_rdo_d": 8192,
@@ -163,7 +163,7 @@ It is useful to change the model like this and call it.
 
 #### refer to (https://github.khronos.org/KTX-Software/ktxtools/toktx.html) for the values ​​below.
 
-- [Option/uastc] uastc_blk_d : specify which block dimension to use for compressing the textures. default value is 8x8.
+- [Option/uastc] astc_blk_d : specify which block dimension to use for compressing the textures. default value is 8x8.
 - [Option/uastc] uastc_quality : This optional parameter selects a speed vs quality tradeoff. default value is 2.
 - [Option/uastc] uastc_rdo_l : Lower values yield higher quality/larger LZ compressed files, higher values yield lower quality/smaller LZ compressed files. A good range to try is [.25,10]. For normal maps a good range is [.25,.75]. The full range is [.001,10.0]. default value is 0.5.
 - [Option/uastc] uastc_rdo_d : lower values=faster, but give less compression. default value is 8192.

@@ -8,7 +8,7 @@
       "defualt_format" : "etc1s",
       "keywords" : ["final"],
 
-      "uastc_blk_d" : "8x8",
+      "astc_blk_d" : "8x8",
       "uastc_quality" : 2,
       "uastc_rdo_l": 0.5,
       "uastc_rdo_d": 8192,
@@ -26,7 +26,7 @@
       "defualt_format" : "etc1s",
       "keywords" : ["final"],
 
-      "uastc_blk_d" : "8x8",
+      "astc_blk_d" : "8x8",
       "uastc_quality" : 2,
       "uastc_rdo_l": 0.5,
       "uastc_rdo_d": 8192,
@@ -44,7 +44,7 @@
       "defualt_format" : "etc1s",
       "keywords" : ["final"],
 
-      "uastc_blk_d" : "8x8",
+      "astc_blk_d" : "8x8",
       "uastc_quality" : 2,
       "uastc_rdo_l": 0.5,
       "uastc_rdo_d": 8192,
@@ -58,11 +58,11 @@
     {
       "max_size" : 2048,
       "scale" : 1,
-      
+
       "defualt_format" : "etc1s",
       "keywords" : ["final"],
 
-      "uastc_blk_d" : "8x8",
+      "astc_blk_d" : "8x8",
       "uastc_quality" : 2,
       "uastc_rdo_l": 0.5,
       "uastc_rdo_d": 8192,
