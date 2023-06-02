@@ -1,5 +1,6 @@
 
 import sys
+from typing import List
 
 
 def parse_config(data):
@@ -28,10 +29,10 @@ def parse_config(data):
     return config
 
 class Config:
-    def __init__(self, output_exts):
+    def __init__(self, output_exts : List[str]):
         self.output_exts = output_exts
-        self.texture_settings = []
-        self.model_settings = []
+        self.texture_settings : List[Config.TextureSetting] = []
+        self.model_settings : List[Config.ModelSetting] = []
 
     def parse_texture_settings(self, texture_settings):
         for setting in texture_settings:
@@ -77,8 +78,9 @@ class Config:
             self.model_settings.append(model_setting)
 
     class TextureSetting:
-        def __init__(self, max_size, scale, default_format, keywords, astc_blk_d, uastc_quality, 
-                     uastc_rdo_l, uastc_rdo_d, zcmp, clevel, qlevel, assign_oetf):
+        def __init__(self, max_size: int, scale: float, default_format: str, keywords: List[str], 
+                     astc_blk_d: str, uastc_quality: int, uastc_rdo_l: float, uastc_rdo_d: int, zcmp: int, 
+                     clevel: float, qlevel: int, assign_oetf: str):
             self.max_size = max_size
             self.scale = min(max(0.01, scale), 1) * 100
             self.default_format = default_format
@@ -93,18 +95,19 @@ class Config:
             self.assign_oetf = assign_oetf
 
             # resize command
-            self.command_resize = f"mogrify -resize {self.max_size}x{self.max_size}\>" + " {}"
+            self.resize = f"mogrify -resize {self.max_size}x{self.max_size}\>" + " {}"
             # resize scale command
-            self.command_resize_scale = f"mogrify -resize {self.scale}%" + " {}"
+            self.resize_scale = f"mogrify -resize {self.scale}%" + " {}"
             # to etc1 ktx2 command
-            self.command_etc1 = f"toktx --genmipmap --t2 --encode {self.default_format} --clevel {self.clevel} --qlevel {self.qlevel} --assign_oetf {self.assign_oetf} --assign_primaries none" + " '{}' '{}'"
+            self.to_etc1s = f"toktx --genmipmap --t2 --encode {self.default_format} --clevel {self.clevel} --qlevel {self.qlevel} --assign_oetf {self.assign_oetf} --assign_primaries none" + " '{}' '{}'"
             # to uastc ktx2 command
-            self.command_uastc = f"toktx --genmipmap --t2 --encode uastc --astc_blk_d {self.astc_blk_d} --uastc_quality {self.uastc_quality} --uastc_rdo_l {self.uastc_rdo_l} --uastc_rdo_d {self.uastc_rdo_d} --zcmp {self.zcmp} --assign_oetf {self.assign_oetf} --assign_primaries none" + " '{}' '{}'"
+            self.to_uastc = f"toktx --genmipmap --t2 --encode uastc --astc_blk_d {self.astc_blk_d} --uastc_quality {self.uastc_quality} --uastc_rdo_l {self.uastc_rdo_l} --uastc_rdo_d {self.uastc_rdo_d} --zcmp {self.zcmp} --assign_oetf {self.assign_oetf} --assign_primaries none" + " '{}' '{}'"
             
 
     class ModelSetting:
-        def __init__(self, suffix, tolerance, ratio, error, lock_border, decode_speed, encode_speed, 
-                     quantize_position, quantize_normal, quantize_texcoord, quantize_color):
+        def __init__(self, suffix: str, tolerance: float, ratio: float, error: float, lock_border: bool, 
+                     decode_speed: int, encode_speed: int, quantize_position: int, quantize_normal: int, 
+                     quantize_texcoord: int, quantize_color: int):
             self.suffix = suffix
             self.tolerance = tolerance
             self.ratio = ratio
@@ -117,10 +120,10 @@ class Config:
             self.quantize_texcoord = quantize_texcoord
             self.quantize_color = quantize_color
             
-            self.command_glb = "gltf-pipeline -i {} -o {} -b --keepUnusedElements --keepLegacyExtensions"
-            self.command_glb_separate = "gltf-pipeline -i {} -o {} -b -t --keepUnusedElements --keepLegacyExtensions"
-            self.command_separate_gltf = "gltf-pipeline -i {} -o {} -t --keepUnusedElements --keepLegacyExtensions"
+            self.glb = "gltf-pipeline -i {} -o {} -b --keepUnusedElements --keepLegacyExtensions"
+            self.glb_separate = "gltf-pipeline -i {} -o {} -b -t --keepUnusedElements --keepLegacyExtensions"
+            self.gltf_separate = "gltf-pipeline -i {} -o {} -t --keepUnusedElements --keepLegacyExtensions"
             
-            self.command_weld = f"gltf-transform weld --tolerance {self.tolerance}" + " {} {}"
-            self.command_simplify = f"gltf-transform simplify --ratio {self.ratio} --error {self.error} --lock_border {self.lock_border}" + " {} {}"
-            self.command_draco = "gltf-transform draco {} {} " + f"--decode-speed {self.decode_speed} --encode-speed {self.encode_speed} --quantize-position {self.quantize_position} --quantize-normal {self.quantize_normal} --quantize-texcoord {self.quantize_normal} --quantize-color {self.quantize_color}"
+            self.weld = f"gltf-transform weld --tolerance {self.tolerance}" + " {} {}"
+            self.simplify = f"gltf-transform simplify --ratio {self.ratio} --error {self.error} --lock_border {self.lock_border}" + " {} {}"
+            self.draco = "gltf-transform draco {} {} " + f"--decode-speed {self.decode_speed} --encode-speed {self.encode_speed} --quantize-position {self.quantize_position} --quantize-normal {self.quantize_normal} --quantize-texcoord {self.quantize_normal} --quantize-color {self.quantize_color}"
