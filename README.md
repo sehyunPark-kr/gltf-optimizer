@@ -1,9 +1,5 @@
 # glTF Optimizer
 
-<!-- <p align="center">
-<a href="https://www.khronos.org/gltf"><img src="doc/gltf.png" onerror="this.src='gltf.png'"/></a>
-</p> -->
-
 `gltf-optimizer` is a tool that optimizes models and textures by combining several command-line tools.
 
 ## Getting Started
@@ -32,6 +28,22 @@ Install [toKTX](https://github.com/KhronosGroup/KTX-Software/blob/main/BUILDING.
 `gltf-optimizer --path <input gltf path> --output <output gltf path> --config <config json path>`
 
 `gltf-optimizer --path ./source --output ./public/assets/ --config ./tools/config.json`
+
+#### Update Mode
+
+`gltf-optimizer --path <input gltf path> --output <output gltf path> --config <config json path> --update`
+
+If you enter --update on the command line, it determines if there is already a glb or gltf with the same name in the output path and optimizes only those files that do not exist.
+
+```JSON
+{
+  "scripts": {
+    "build-gltf": "yarn build-gltf-all --update",
+    "build-gltf-all": "python3 tools/gltf-optimizer.py --path ./source --output ./public --config tools/config.json"
+  }
+}
+```
+It is convenient to use it by registering it in package.json like this.
 
 ## Output
 <img src="img/output.png" width="200"></image>

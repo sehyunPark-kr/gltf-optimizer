@@ -40,13 +40,20 @@ def run(base_model_input_path, final_output_path, config_file, update_mode):
         print("At least 1 model file(glb/gltf) is required.")
         sys.exit(2)
 
+    output_exts = data.get("output_ext", [])
+
 #----------------------------------------------
     # Check if the file already exists in the output folder. In update mode 
     if update_mode:
-        target_base_model_file_paths = get_not_exist_file_paths(target_base_model_file_paths, final_output_path, model_settings)
+        target_base_model_file_paths = get_not_exist_file_paths(target_base_model_file_paths, final_output_path, model_settings, output_exts)
         if len(target_base_model_file_paths) == 0:
             print("All modeling already exists in the output path. Clear --update to run nonetheless")
             sys.exit(2)
+
+    print("\n\n-----------------------\n")
+    for file_path in target_base_model_file_paths:
+        print("{}\n".format(file_path))
+    print("-----------------------\n\n")
 
 #----------------------------------------------
     # Get current path
@@ -91,7 +98,6 @@ def run(base_model_input_path, final_output_path, config_file, update_mode):
 #--------------------------------------------
     # Move output path
 
-    output_exts = data.get("output_ext", [])
     for file_path in os.listdir(workspace_path):
         is_output_ext = False
         for ext in output_exts:
@@ -140,27 +146,26 @@ def convert_file_path(file, path, ext):
     output_path = os.path.join(path, output_name)
     return output_path
 
-def get_not_exist_file_paths(target_base_model_file_paths, final_output_path, model_settings):
-    target_paths = []
+def get_not_exist_file_paths(target_base_model_file_paths, final_output_path, model_settings, output_exts):
+
     suffixs = []
     for model_setting in model_settings:
         suffixs.append(model_setting.get("suffix", ""))
 
-    already_file_paths = get_all_file_paths(final_output_path, ['glb', 'gltf'], True)
-    for already_file_path in already_file_paths:
-        already_file_name = os.path.splitext(os.path.basename(already_file_path))[0]
-        for suffix in suffixs:
-            already_file_name = already_file_name.replace(suffix, "")
+    target_paths = []
+    for file_path in target_base_model_file_paths:
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
 
-        is_not_exist = True
-        for file_path in target_base_model_file_paths:
-            if already_file_name in file_path:
-                is_not_exist = False
-                break
-
-        if is_not_exist:
+        is_not_exist_file = False
+        for ext in output_exts:
+            for suffix in suffixs:
+                output_path = "{}/{}{}{}".format(final_output_path, file_name, suffix, ext)
+                if not os.path.exists(output_path):
+                    is_not_exist_file = True
+                    break
+        if is_not_exist_file:
             target_paths.append(file_path)
-
+            
     return target_paths
 
 #--------------------------------------------
