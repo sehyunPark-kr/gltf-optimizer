@@ -1,0 +1,10 @@
+{
+  "name": "gltf-optimizer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "gltf-optimize": "yarn build-gltf-all --update",
+    "gltf-optimize-all": "python3 gltf-optimizer.py --path ./source --output ./model --config config.json",
+    "gltf-optimize-test": "python3 gltf-optimizer.py --path ./source --output ./model --config config_test.json"
+  }
+}
