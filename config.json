@@ -78,8 +78,8 @@
     {
       "suffix": "_LOD0",
 
-      "decode_speed": 7,
-      "encode_speed": 7,
+      "decode_speed": 10,
+      "encode_speed": 10,
       "quantize_position": 11,
       "quantize_normal": 8,
       "quantize_texcoord": 10,
@@ -92,8 +92,8 @@
       "ratio": 0.5,
       "error": 0.01,
 
-      "decode_speed": 7,
-      "encode_speed": 7,
+      "decode_speed": 10,
+      "encode_speed": 10,
       "quantize_position": 11,
       "quantize_normal": 8,
       "quantize_texcoord": 10,

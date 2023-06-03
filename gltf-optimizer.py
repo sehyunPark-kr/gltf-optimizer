@@ -89,7 +89,7 @@ def run(base_model_input_path : str, final_output_path : str, config_file : str,
 
         shutil.move(source_file_path, destination_file_path)
 
-    # shutil.rmtree(workspace_path)
+    shutil.rmtree(dir.workspace)
 
 #--------------------------------------------
     # Print total time
@@ -210,37 +210,54 @@ def optimize_model(model_setting : Config.ModelSetting, dir : Directory, file_pa
 
     buffers = gltf_data.get("buffers", [])
     if len(buffers) > 0:
+    #--------------------------------------------
+        # Remember value before optimize
         extensionsUsed = gltf_data.get("extensionsUsed", [])
-        extensionsUsed.append("KHR_texture_basisu")
-        extensionsUsed.append("KHR_draco_mesh_compression")
         extensionsRequired = gltf_data.get("extensionsRequired", [])
-        extensionsRequired.append("KHR_texture_basisu")
-        extensionsRequired.append("KHR_draco_mesh_compression")
+        
         samplers = gltf_data.get("samplers", [])
         textures = gltf_data.get("textures", [])
         materials = gltf_data.get("materials", [])
 
-        if model_setting.tolerance != -1:
+    #--------------------------------------------
+        # optimize process
+        if model_setting.tolerance != -1: 
             subprocess.run(model_setting.weld(copy_to_glb_path, copy_to_glb_path), shell=True)
 
         if model_setting.ratio != -1:
             subprocess.run(model_setting.simplify(copy_to_glb_path, copy_to_glb_path), shell=True)
 
+        extensionsUsed.append("KHR_draco_mesh_compression")
+        extensionsRequired.append("KHR_draco_mesh_compression")
         subprocess.run(model_setting.draco(copy_to_glb_path, copy_to_glb_path), shell=True)
 
+    #--------------------------------------------
+        # post process
         copy_to_gltf_path = convert_file_path(file_path, dir.workspace, "{}.gltf".format(model_setting.suffix))
         subprocess.run(model_setting.to_gltf_separate(copy_to_glb_path, copy_to_gltf_path), shell=True)
 
         with open(copy_to_gltf_path, 'r') as file:
             gltf_data = json.load(file)
 
+        # Change the texture to the ktx2 extension in the finally created gltf and register the extension.
+        extensionsUsed.append("KHR_texture_basisu")
+        extensionsRequired.append("KHR_texture_basisu")
         images = gltf_data.get("images", [])
         for image in images:
             image["mimeType"] = "image/ktx2"
-            image["uri"] = image["uri"].replace(".png", ".ktx2")
+            uri = image["uri"]
+            path, name = os.path.split(uri)
+            new_name = os.path.splitext(name)[0] + ".ktx2"
+            image["uri"] = os.path.join(path, new_name) 
 
+        # KHR_draco_mesh_compression and KHR_texture_basisu are added to the extension defined in the original..
         gltf_data["extensionsUsed"] = extensionsUsed
         gltf_data["extensionsRequired"] = extensionsRequired
+
+        # When optimizing through gltf-transform, sampler, texture, and material 
+        # that are judged not to be used in the gltf official schema are removed. 
+        # Lightmap or texuture defined in extended implementation may also be omitted, 
+        # so the previous value is restored.
         gltf_data["samplers"] = samplers
         gltf_data["textures"] = textures
         gltf_data["materials"] = materials
