@@ -45,35 +45,34 @@ class Config:
         # ref : https://github.khronos.org/KTX-Software/ktxtools/toktx.html
 
         # to ktx common command
-        def to_ktx_common(self, src, dst) -> str:
+        def to_ktx_common(self) -> str:
             return (
                 "toktx "
                 "--genmipmap "
                 "--t2 "
                 "--assign_primaries none "
-                 "'{}' '{}' "
-            ).format(dst, src) # reverce input
+            )
     
         # to etc1 ktx2 command
         def to_etc1s(self, src, dst) -> str:
-            return self.to_ktx_common(src, dst) + (
+            return self.to_ktx_common() + (
                 "--encode etc1s "
-                f"--clevel {self.clevel} "
-                f"--qlevel {self.qlevel} "
-                f"--assign_oetf {self.assign_oetf}"
-            )
+                f"--assign_oetf {self.assign_oetf} "
+                "'{}' '{}' "
+            ).format(dst, src)
         
         # to uastc ktx2 command
         def to_uastc(self, src, dst) -> str:
-            return self.to_ktx_common(src, dst) + (
+            return self.to_ktx_common() + (
                 "--encode uastc "
                 f"--astc_blk_d {self.astc_blk_d} "
                 f"--uastc_quality {self.uastc_quality} "
                 f"--uastc_rdo_l {self.uastc_rdo_l} "
                 f"--uastc_rdo_d {self.uastc_rdo_d} "
                 f"--zcmp {self.zcmp} "
-                f"--assign_oetf {self.assign_oetf}"
-            )
+                f"--assign_oetf {self.assign_oetf} "
+                "'{}' '{}' "
+            ).format(dst, src)
         
         # set default format to ktx2 command
         def to_ktx(self, src, dst) -> str: 
